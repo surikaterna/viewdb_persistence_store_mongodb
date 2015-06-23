@@ -1,0 +1,36 @@
+{
+  "name": "viewdb_persistence_store_mongodb",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha test --recursive",
+    "coverage": "istanbul cover node_modules/mocha/bin/_mocha -- --recursive test -u exports -R spec",
+    "coverage-start": "istanbul cover node_modules/mocha/bin/_mocha test --recursive -- -u exports -R spec && start coverage/lcov-report/index.html",
+    "jshint": "jshint ./lib",
+    "jscs": "jscs -p google ./lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/surikaterna/viewdb_persistence_store_mongodb.git"
+  },
+  "author": "Andreas Karlsson",
+  "devDependencies": {
+    "istanbul": "^0.3.2",
+    "jshint": "^2.5.10",
+    "mocha": "^2.0.1",
+    "should": "^4.1.0"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/surikaterna/viewdb_persistence_store_mongodb/issues"
+  },
+  "homepage": "https://github.com/surikaterna/viewdb_persistence_store_mongodb#readme",
+  "dependencies": {
+    "bluebird": "^2.9.30",
+    "mongodb": "^2.0.35"
+  }
+}
