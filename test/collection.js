@@ -126,5 +126,16 @@ describe('mongodb_persistence', function () {
 				});
 			});
 		});
+		it('#remove should remove one document', function (done) {
+			var store = new Store(getDb());
+			store.collection('dollhouse').insert({ _id: 'echo', name: { first: 'ECHO', last: "TV" } });
+			store.collection('dollhouse').insert({ _id: 'sierra', name: { first: 'SIERRA', last: "TV" } });
+			store.collection('dollhouse').remove({ _id: 'echo', name: { first: 'ECHO', last: "TV" } });
+
+			store.collection('dollhouse').find({ 'name.first': 'ECHO'}).toArray(function(err, results) {
+				results.length.should.equal(0);
+				done();
+			});
+		})
 	})
 })
