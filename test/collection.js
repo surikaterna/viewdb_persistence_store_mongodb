@@ -83,59 +83,83 @@ describe('mongodb_persistence', function () {
 			var store = new Store(getDb());
 			store.open().then(function () {
 				store.collection('dollhouse').insert({ _id: 'echo' });
-				store.collection('dollhouse').insert({ _id: 'sierra' });
-				store.collection('dollhouse').find({}).toArray(function (err, results) {
-					results.length.should.equal(2);
-					done();
-				});
+				store.collection('dollhouse').insert({ _id: 'sierra' }, function () {
+					store.collection('dollhouse').find({}).toArray(function (err, results) {
+						results.length.should.equal(2);
+						done();
+					});
+        });
 			});
 		});
 		it('#find {_id:"echo"} should return correct document', function (done) {
 			var store = new Store(getDb());
 			store.open().then(function () {
 				store.collection('dollhouse').insert({ _id: 'echo' });
-				store.collection('dollhouse').insert({ _id: 'sierra' });
-				store.collection('dollhouse').find({ _id: 'echo' }).toArray(function (err, results) {
-					results.length.should.equal(1);
-					results[0]._id.should.equal('echo');
-					done();
-				});
+				store.collection('dollhouse').insert({ _id: 'sierra' }, function () {
+					store.collection('dollhouse').find({ _id: 'echo' }).toArray(function (err, results) {
+						results.length.should.equal(1);
+						results[0]._id.should.equal('echo');
+						done();
+					});
+        });
 			});
 		});
 		it('#find with complex key {"name.first":"echo"} should return correct document', function (done) {
 			var store = new Store(getDb());
 			store.open().then(function () {
 				store.collection('dollhouse').insert({ _id: 'echo', name: { first: 'ECHO', last: "TV" } });
-				store.collection('dollhouse').insert({ _id: 'sierra', name: { first: 'SIERRA', last: "TV" } });
-				store.collection('dollhouse').find({ "name.first": 'ECHO' }).toArray(function (err, results) {
-					results.length.should.equal(1);
-					results[0]._id.should.equal('echo');
-					done();
-				});
+				store.collection('dollhouse').insert({ _id: 'sierra', name: { first: 'SIERRA', last: "TV" } }, function () {
+					store.collection('dollhouse').find({ "name.first": 'ECHO' }).toArray(function (err, results) {
+						results.length.should.equal(1);
+						results[0]._id.should.equal('echo');
+						done();
+					});
+        });
 			});
 		});
 		it('#drop should remove all documents', function (done) {
 			var store = new Store(getDb());
 			store.open().then(function () {
 				store.collection('dollhouse').insert({ _id: 'echo' });
-				store.collection('dollhouse').drop();
-
-				store.collection('dollhouse').find({}).toArray(function (err, results) {
-					results.length.should.equal(0);
-					done();
-				});
+				store.collection('dollhouse').drop(function () {
+					store.collection('dollhouse').find({}).toArray(function (err, results) {
+						results.length.should.equal(0);
+						done();
+					});
+        });
 			});
 		});
 		it('#remove should remove one document', function (done) {
 			var store = new Store(getDb());
 			store.collection('dollhouse').insert({ _id: 'echo', name: { first: 'ECHO', last: "TV" } });
-			store.collection('dollhouse').insert({ _id: 'sierra', name: { first: 'SIERRA', last: "TV" } });
-			store.collection('dollhouse').remove({ _id: 'echo'});
-
-			store.collection('dollhouse').find({ 'name.first': 'ECHO'}).toArray(function(err, results) {
-				results.length.should.equal(0);
-				done();
+			store.collection('dollhouse').insert({ _id: 'sierra', name: { first: 'SIERRA', last: "TV" } }, function () {
+				store.collection('dollhouse').remove({ _id: 'echo'}, function () {
+					store.collection('dollhouse').find({ 'name.first': 'ECHO'}).toArray(function(err, results) {
+						results.length.should.equal(0);
+						done();
+					});
+				});
+      });
+		});
+		var populate = function (collection, id, cb) {
+			collection.insert({ a: 'a', id: id }, function () {
+				if (id === 9) {
+					cb();
+				} else {
+					populate(collection, ++id, cb);
+				}
 			});
-		})
+    };
+    it('#skip/limit', function (done) {
+      var db = getDb();
+      var collection = db.collection('dollhouse');
+      populate(collection, 0, function () {
+				collection.find({ a: 'a' }).skip(8).limit(10).toArray(function (err, res) {
+					res[1].id.should.equal(9);
+					res.length.should.equal(2); // only 2 left after skipping 8/10
+					done();
+				});
+      });
+    });
 	})
-})
+});

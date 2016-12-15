@@ -1,13 +1,13 @@
 {
   "name": "viewdb_persistence_store_mongodb",
-  "version": "1.0.1",
+  "version": "1.2.0",
   "description": "",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "mocha test --recursive",
+    "test": "mocha test --recursive --watch",
     "coverage": "istanbul cover node_modules/mocha/bin/_mocha -- --recursive test -u exports -R spec",
     "coverage-start": "istanbul cover node_modules/mocha/bin/_mocha test --recursive -- -u exports -R spec && start coverage/lcov-report/index.html",
     "jshint": "jshint ./lib",
@@ -31,8 +31,10 @@
   "homepage": "https://github.com/surikaterna/viewdb_persistence_store_mongodb#readme",
   "dependencies": {
     "bluebird": "^2.9.30",
-    "mongodb": "^2.0.35"
-  }, "peerDependencies": {
-     "viewdb":"^0.1.10"
+    "mongodb": "^2.0.35",
+    "lodash": "^4.13.1"
+  },
+  "peerDependencies": {
+    "viewdb": "^0.2.0"
   }
 }
