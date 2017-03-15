@@ -45,7 +45,6 @@ describe('Observe', function () {
           x._id.should.equal('echo');
         },
         changed: function (asis, tobe) {
-          console.log('changed..');
           asis.age.should.equal(10);
           tobe.age.should.equal(100);
           handle.stop();
@@ -53,11 +52,7 @@ describe('Observe', function () {
         }
       });
       store.collection('dollhouse').insert({ _id: 'echo', age: 10 }, function () {
-        console.log('insert cb');
-        store.collection('dollhouse').save({ _id: 'echo', age: 100 }, function () {
-          console.log('save callback');
-
-        });
+        store.collection('dollhouse').save({ _id: 'echo', age: 100 }, function () {});
       });
     });
   });
