@@ -25,10 +25,10 @@ describe('Observe', function () {
     });
   });
   afterEach(function (done) {
-		/*_db.dropDatabase(function() {
+		_db.dropDatabase(function() {
 		 done();
-		 }); */
-    done();
+		 });
+    // done();
   });
   after(function (done) {
     _db.close(function () {
@@ -45,6 +45,7 @@ describe('Observe', function () {
           x._id.should.equal('echo');
         },
         changed: function (asis, tobe) {
+          console.log('changed..');
           asis.age.should.equal(10);
           tobe.age.should.equal(100);
           handle.stop();
@@ -52,10 +53,14 @@ describe('Observe', function () {
         }
       });
       store.collection('dollhouse').insert({ _id: 'echo', age: 10 }, function () {
-        store.collection('dollhouse').save({ _id: 'echo', age: 100 });
+        console.log('insert cb');
+        store.collection('dollhouse').save({ _id: 'echo', age: 100 }, function () {
+          console.log('save callback');
+
+        });
       });
     });
-  }).timeout(500);
+  });
   it('#observe with insert', function (done) {
     var store = getVDb();
     store.open().then(function () {
@@ -69,22 +74,24 @@ describe('Observe', function () {
       });
       store.collection('dollhouse').insert({ _id: 'echo' });
     });
-  }).timeout(500);
+  })
+
   it('#observe with query and insert', function (done) {
     var store = getVDb();
     store.open().then(function () {
-      store.collection('dollhouse').insert({ _id: 'echo' });
-      var cursor = store.collection('dollhouse').find({ _id: 'echo2' });
-      var handle = cursor.observe({
-        added: function (x) {
-          x._id.should.equal('echo2');
-          handle.stop();
-          done();
-        }
+      store.collection('dollhouse').insert({ _id: 'echo' }, function () {
+        var cursor = store.collection('dollhouse').find({ _id: 'echo2' });
+        var handle = cursor.observe({
+          added: function (x) {
+            x._id.should.equal('echo2');
+            handle.stop();
+            done();
+          }
+        });
       });
       store.collection('dollhouse').insert({ _id: 'echo2' });
     });
-  }).timeout(500);
+  })
   it('#observe with query and skip', function (done) {
     var store = getVDb();
     store.open().then(function () {
@@ -110,5 +117,5 @@ describe('Observe', function () {
         }
       });
     });
-  }).timeout(500);
+  })
 });
