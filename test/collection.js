@@ -72,18 +72,20 @@ describe('mongodb_persistence', function () {
     it('#find {} should return single inserted document', function (done) {
       var store = new Store(getDb());
       store.open().then(function () {
-        store.collection('dollhouse').insert({ _id: 'echo' });
-        store.collection('dollhouse').find({}).toArray(function (err, results) {
-          results.length.should.equal(1);
-          done();
+        store.collection('dollhouse').insert({ _id: 'echo' }, function () {
+          store.collection('dollhouse').find({}).toArray(function (err, results) {
+            results.length.should.equal(1);
+            done();
+          });
         });
       });
     });
     it('#find {} should return multiple inserted documents', function (done) {
       var store = new Store(getDb());
       store.open().then(function () {
-        store.collection('dollhouse').insert({ _id: 'echo' });
-        store.collection('dollhouse').insert({ _id: 'sierra' }, function () {
+        // store.collection('dollhouse').insert([{ _id: 'echo' }, { _id: 'sierra' }]);
+
+        store.collection('dollhouse').insert([{ _id: 'echo' }, { _id: 'sierra' }], function () {
           store.collection('dollhouse').find({}).toArray(function (err, results) {
             results.length.should.equal(2);
             done();
