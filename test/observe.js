@@ -1,7 +1,6 @@
 var should = require('should');
 var _ = require('lodash');
 var MongoClient = require('mongodb').MongoClient;
-var Server = require('mongodb').Server;
 var ViewDb = require('viewdb');
 var Store = require('../lib/store');
 
