@@ -4,7 +4,7 @@ var MongoClient = require('mongodb').MongoClient;
 var ViewDb = require('viewdb');
 var Store = require('../lib/store');
 
-describe('Observe', function () {
+describe('Oplog Observe', function () {
   var _db = null;
   function getDb() {
     return _db;
@@ -24,9 +24,9 @@ describe('Observe', function () {
     });
   });
   afterEach(function (done) {
-		_db.dropDatabase(function() {
-		 done();
-		 });
+    _db.dropDatabase(function() {
+      done();
+    });
     // done();
   });
   after(function (done) {
@@ -34,17 +34,17 @@ describe('Observe', function () {
       done();
     });
   });
-  it('#observe with query and update', function (done) {
+  it('#oplog observe with query and update', function (done) {
     var store = getVDb();
     store.open().then(function () {
       var cursor = store.collection('dollhouse').find({ _id: 'echo' });
       var handle = cursor.observe({
+        oplog: true,
         added: function (x) {
           x.age.should.equal(10);
           x._id.should.equal('echo');
         },
         changed: function (asis, tobe) {
-          asis.age.should.equal(10);
           tobe.age.should.equal(100);
           handle.stop();
           done();
@@ -55,28 +55,32 @@ describe('Observe', function () {
       });
     });
   });
-  it('#observe with insert', function (done) {
+  it('#oplog observe with insert', function (done) {
     var handle;
     var store = getVDb();
     store.open().then(function () {
       var collection = store.collection('dollhouse');
       var cursor = collection.find({});
       handle = cursor.observe({
+        oplog: true,
         added: function (x) {
           x._id.should.equal('echo');
           handle.stop();
           done();
         }
       });
-      collection.insert({ _id: 'echo' });
+      setTimeout(function () {
+        collection.insert({ _id: 'echo' });
+      }, 10)
     });
   })
-  it('#observe with remove', function (done) {
+  it('#oplog observe with remove', function (done) {
     var realDone = _.after(2, done);
     var store = getVDb();
     store.open().then(function () {
       var cursor = store.collection('dollhouse').find({});
       var handle = cursor.observe({
+        oplog: true,
         added: function (x) {
           x._id.should.equal('echo');
           realDone();
@@ -92,12 +96,13 @@ describe('Observe', function () {
       });
     });
   })
-  it('#observe with query and insert', function (done) {
+  it('#oplog observe with query and insert', function (done) {
     var store = getVDb();
     store.open().then(function () {
       store.collection('dollhouse').insert({ _id: 'echo1' }, function () {
         var cursor = store.collection('dollhouse').find({ _id: 'echo2' });
         var handle = cursor.observe({
+          oplog: true,
           added: function (x) {
             x._id.should.equal('echo2');
             done();
@@ -110,7 +115,8 @@ describe('Observe', function () {
       });
     });
   })
-  it('#observe with query and skip', function (done) {
+  it('#oplog observe with query and skip', function (done) {
+    // TODO FIX
     var store = getVDb();
     store.open().then(function () {
       store.collection('dollhouse').insert({ _id: 'echo' });
@@ -129,6 +135,7 @@ describe('Observe', function () {
       });
 
       handle = cursor.observe({
+        oplog: true,
         added: function (x) {
           cursor.skip(++skip);
           realDone();
