@@ -46,12 +46,13 @@ describe('Oplog Observe', function () {
         },
         changed: function (asis, tobe) {
           tobe.age.should.equal(100);
+          tobe.someOtherProp.should.equal('yes');
           handle.stop();
           done();
         }
       });
-      store.collection('dollhouse').insert({ _id: 'echo', age: 10 }, function () {
-        store.collection('dollhouse').save({ _id: 'echo', age: 100 }, function () {});
+      store.collection('dollhouse').insert({ _id: 'echo', age: 10, someOtherProp: 'yes' }, function () {
+        store.collection('dollhouse').save({ _id: 'echo', age: 100, someOtherProp: 'yes' }, function () {});
       });
     });
   });
@@ -84,18 +85,18 @@ describe('Oplog Observe', function () {
         oplog: true,
         added: function (x) {
           x._id.should.equal('echo');
+          x.someOldProp.should.equal('cool');
         },
         changed: function (asis, tobe, index) {
           tobe._id.should.equal('echo');
           tobe.newProp.should.equal('yes');
+          tobe.someOldProp.should.equal('cool');
           handle.stop();
           done();
         }
       });
-      collection.insert({ _id: 'echo' });
-      setTimeout(function () {
-        collection.findAndModify({ _id: 'echo' }, [], { $set: { newProp: 'yes' }});
-      }, 10)
+      collection.insert({ _id: 'echo', someOldProp: 'cool' });
+      collection.findAndModify({ _id: 'echo' }, null, { $set: { newProp: 'yes' }});
     });
   })
   it('#oplog observe with findAndModify upsert', function (done) {
