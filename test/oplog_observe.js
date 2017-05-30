@@ -116,7 +116,6 @@ describe('Oplog Observe', function () {
     });
   })
   it('#oplog observe with query and skip', function (done) {
-    // TODO FIX
     var store = getVDb();
     store.open().then(function () {
       store.collection('dollhouse').insert({ _id: 'echo' });
