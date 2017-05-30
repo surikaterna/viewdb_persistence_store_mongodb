@@ -98,7 +98,7 @@ describe('Oplog Observe', function () {
         collection.insert({ _id: 'echo' });
       }, 10)
     });
-  })
+  });
   it('#oplog observe with findAndModify', function (done) {
     var handle;
     var store = getVDb();
