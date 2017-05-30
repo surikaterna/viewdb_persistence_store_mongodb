@@ -68,15 +68,15 @@ describe('Oplog Observe', function () {
         },
         changed: function () {
           done(new Error('Should not be part of query'));
+        },
+        removed: function (x) {
+          x._id.should.equal('echo');
+          handle.stop();
+          done();
         }
       });
       store.collection('dollhouse').insert({ _id: 'echo', age: 10, someOtherProp: 'yes' }, function () {
-        store.collection('dollhouse').save({ _id: 'echo', age: 5, someOtherProp: 'yes' }, function () {
-          setTimeout(function () {
-            handle.stop();
-            done();
-          }, 200)
-        });
+        store.collection('dollhouse').save({ _id: 'echo', age: 5, someOtherProp: 'yes' }, function () {});
       });
     });
   });
@@ -121,6 +121,33 @@ describe('Oplog Observe', function () {
       });
       collection.insert({ _id: 'echo', someOldProp: 'cool' });
       collection.findAndModify({ _id: 'echo' }, null, { $set: { newProp: 'yes' }});
+    });
+  })
+  it('#oplog observe with query and update falling outside of query with findAndModify ', function (done) {
+    var handle;
+    var store = getVDb();
+    store.open().then(function () {
+      var collection = store.collection('dollhouse');
+      var cursor = collection.find({age: { $gte: 10 }});
+      handle = cursor.observe({
+        oplog: true,
+        added: function (x) {
+          x._id.should.equal('echo');
+          x.age.should.equal(10);
+        },
+        changed: function (a, t) {
+          done(new Error('Should not be part of query'));
+        },
+        removed: function (x) {
+          x._id.should.equal('echo');
+          x.age.should.equal(5);
+          handle.stop();
+          done();
+        }
+      });
+      collection.insert({ _id: 'echo', age: 10 }, function () {
+        collection.findAndModify({ _id: 'echo' }, null, { $set: { age: 5 }});
+      });
     });
   })
   it('#oplog observe with findAndModify upsert', function (done) {
