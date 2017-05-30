@@ -56,6 +56,30 @@ describe('Oplog Observe', function () {
       });
     });
   });
+  it('#oplog observe with query and update falling outside of query', function (done) {
+    var store = getVDb();
+    store.open().then(function () {
+      var cursor = store.collection('dollhouse').find({ _id: 'echo', age: { $gte: 10} });
+      var handle = cursor.observe({
+        oplog: true,
+        added: function (x) {
+          x.age.should.equal(10);
+          x._id.should.equal('echo');
+        },
+        changed: function () {
+          done(new Error('Should not be part of query'));
+        }
+      });
+      store.collection('dollhouse').insert({ _id: 'echo', age: 10, someOtherProp: 'yes' }, function () {
+        store.collection('dollhouse').save({ _id: 'echo', age: 5, someOtherProp: 'yes' }, function () {
+          setTimeout(function () {
+            handle.stop();
+            done();
+          }, 200)
+        });
+      });
+    });
+  });
   it('#oplog observe with insert', function (done) {
     var handle;
     var store = getVDb();
