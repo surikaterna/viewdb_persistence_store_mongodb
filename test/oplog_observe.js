@@ -74,6 +74,53 @@ describe('Oplog Observe', function () {
       }, 10)
     });
   })
+  it('#oplog observe with findAndModify', function (done) {
+    var handle;
+    var store = getVDb();
+    store.open().then(function () {
+      var collection = store.collection('dollhouse');
+      var cursor = collection.find({});
+      handle = cursor.observe({
+        oplog: true,
+        added: function (x) {
+          x._id.should.equal('echo');
+        },
+        changed: function (asis, tobe, index) {
+          tobe._id.should.equal('echo');
+          tobe.newProp.should.equal('yes');
+          handle.stop();
+          done();
+        }
+      });
+      collection.insert({ _id: 'echo' });
+      setTimeout(function () {
+        collection.findAndModify({ _id: 'echo' }, [], { $set: { newProp: 'yes' }});
+      }, 10)
+    });
+  })
+  it('#oplog observe with findAndModify upsert', function (done) {
+    var handle;
+    var store = getVDb();
+    store.open().then(function () {
+      var collection = store.collection('dollhouse');
+      var cursor = collection.find({});
+      handle = cursor.observe({
+        oplog: true,
+        added: function (x) {
+          x._id.should.equal('echo');
+          x.newProp.should.equal('yes');
+          x.moarComplex.yes.sir.should.equal(true);
+          handle.stop();
+          done();
+        }
+      });
+      setTimeout(function () {
+        const update = { $set: { newProp: 'yes', moarComplex: { yes: { sir: true}} }};
+        const options = { upsert: true };
+        collection.findAndModify({ _id: 'echo' }, null, update, options);
+      }, 10);
+    });
+  });
   it('#oplog observe with remove', function (done) {
     var realDone = _.after(2, done);
     var store = getVDb();
