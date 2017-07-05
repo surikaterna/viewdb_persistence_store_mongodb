@@ -1,6 +1,6 @@
 {
   "name": "viewdb_persistence_store_mongodb",
-  "version": "1.4.12",
+  "version": "1.4.13",
   "description": "",
   "main": "index.js",
   "directories": {
@@ -38,6 +38,6 @@
     "mongodb": "^2.0.35"
   },
   "peerDependencies": {
-    "viewdb": "^0.4.0"
+    "viewdb": "^0.x.x"
   }
 }
