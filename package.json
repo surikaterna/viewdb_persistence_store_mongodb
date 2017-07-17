@@ -32,7 +32,7 @@
   "homepage": "https://github.com/surikaterna/viewdb_persistence_store_mongodb#readme",
   "dependencies": {
     "bluebird": "^2.9.30",
-    "kuery": "^0.3.4",
+    "kuery": "^0.4.0",
     "lodash": "^4.13.1",
     "mongo-oplog": "^2.0.2",
     "mongodb": "^2.0.35"
