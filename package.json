@@ -1,6 +1,6 @@
 {
   "name": "viewdb_persistence_store_mongodb",
-  "version": "1.4.17",
+  "version": "1.4.18",
   "description": "",
   "main": "index.js",
   "directories": {
