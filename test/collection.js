@@ -45,7 +45,7 @@ describe('mongodb_persistence', function () {
         });
       });
     });
-    it.only('#find with setReadPreference', function (done) {
+    it('#find with setReadPreference', function (done) {
       var store = new Store(getDb());
       store.open().then(function () {
         var cursor = store.collection('dollhouse').find({});
