@@ -1,5 +1,6 @@
 var should = require('should');
 var MongoClient = require('mongodb').MongoClient;
+var ReadPreference = require('mongodb').ReadPreference;
 var Server = require('mongodb').Server;
 
 var Store = require('../lib/store');
@@ -39,6 +40,17 @@ describe('mongodb_persistence', function () {
       var store = new Store(getDb());
       store.open().then(function () {
         store.collection('dollhouse').find({}).toArray(function (err, results) {
+          results.length.should.equal(0);
+          done();
+        });
+      });
+    });
+    it.only('#find with setReadPreference', function (done) {
+      var store = new Store(getDb());
+      store.open().then(function () {
+        var cursor = store.collection('dollhouse').find({});
+        cursor.setReadPreference(ReadPreference.PRIMARY);
+        cursor.toArray(function (err, results) {
           results.length.should.equal(0);
           done();
         });
