@@ -131,6 +131,19 @@ describe('mongodb_persistence', function () {
         });
       });
     });
+    it('#find with project should return correct projection', function (done) {
+      var store = new Store(getDb());
+      store.open().then(function () {
+        store.collection('dollhouse').insert({ _id: 'echo', name: { first: 'ECHO', last: "TV" } });
+        store.collection('dollhouse').insert({ _id: 'sierra', name: { first: 'SIERRA', last: "TV" } }, function () {
+          store.collection('dollhouse').find({}).project({_id: 1}).toArray(function (err, results) {
+            should.equal(results[0].name, undefined);
+            results[0]._id.should.equal('echo');
+            done();
+          });
+        });
+      });
+    });
     it('#drop should remove all documents', function (done) {
       var store = new Store(getDb());
       store.open().then(function () {
