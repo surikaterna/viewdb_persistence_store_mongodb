@@ -10,7 +10,7 @@ describe('Oplog Observe', function () {
     return _db;
   }
   function getVDb() {
-    return new ViewDb(new Store(getDb()));
+    return new ViewDb(new Store(getDb(), true));
   }
   before(function (done) {
     MongoClient.connect("mongodb://localhost:27017/db_test_suite", function (err, db) {
@@ -47,9 +47,8 @@ describe('Oplog Observe', function () {
         changed: function (asis, tobe) {
           tobe.age.should.equal(100);
           tobe.someOtherProp.should.equal('yes');
-          handle.stop().then(() => {
-            done();
-          });
+          handle.stop();
+          done();
         }
       });
       store.collection('dollhouse').insert({ _id: 'echo', age: 10, someOtherProp: 'yes' }, function () {
@@ -72,9 +71,8 @@ describe('Oplog Observe', function () {
         },
         removed: function (x) {
           x._id.should.equal('echo');
-          handle.stop().then(() => {
-            done();
-          });
+          handle.stop();
+          done();
         }
       });
       store.collection('dollhouse').insert({ _id: 'echo', age: 10, someOtherProp: 'yes' }, function () {
@@ -92,9 +90,8 @@ describe('Oplog Observe', function () {
         oplog: true,
         added: function (x) {
           x._id.should.equal('echo');
-          handle.stop().then(() => {
-            done();
-          });
+          handle.stop();
+          done();
         }
       });
       setTimeout(function () {
@@ -118,9 +115,8 @@ describe('Oplog Observe', function () {
           tobe._id.should.equal('echo');
           tobe.newProp.should.equal('yes');
           tobe.someOldProp.should.equal('cool');
-          handle.stop().then(() => {
-            done();
-          });
+          handle.stop();
+          done();
         }
       });
       collection.insert({ _id: 'echo', someOldProp: 'cool' });
@@ -145,9 +141,8 @@ describe('Oplog Observe', function () {
         removed: function (x) {
           x._id.should.equal('echo');
           x.age.should.equal(5);
-          handle.stop().then(() => {
-            done();
-          });
+          handle.stop();
+          done();
         }
       });
       collection.insert({ _id: 'echo', age: 10 }, function () {
@@ -167,9 +162,8 @@ describe('Oplog Observe', function () {
           x._id.should.equal('echo');
           x.newProp.should.equal('yes');
           x.moarComplex.yes.sir.should.equal(true);
-          handle.stop().then(() => {
-            done();
-          });
+          handle.stop();
+          done();
         }
       });
       setTimeout(function () {
@@ -191,9 +185,8 @@ describe('Oplog Observe', function () {
           realDone();
         },
         removed: function (x) {
-          handle.stop().then(() => {
-            realDone();
-          });
+          handle.stop();
+          realDone();
         }
       });
       var coll = store.collection('dollhouse');
@@ -211,9 +204,8 @@ describe('Oplog Observe', function () {
           oplog: true,
           added: function (x) {
             x._id.should.equal('echo2');
-            handle.stop().then(() => {
-              done();
-            });
+            handle.stop();
+            done();
           }
         });
       });
@@ -235,9 +227,8 @@ describe('Oplog Observe', function () {
       var realDone = _.after(3, function () {
         cursor.toArray(function (err, res) {
           res.length.should.equal(0);
-          handle.stop().then(() => {
-            done();
-          });
+          handle.stop();
+          done();
         })
       });
 
