@@ -24,7 +24,7 @@ describe('Oplog Observe', function () {
     });
   });
   afterEach(function (done) {
-    _db.dropDatabase(function() {
+    _db.dropDatabase(function () {
       done();
     });
     // done();
@@ -52,14 +52,15 @@ describe('Oplog Observe', function () {
         }
       });
       store.collection('dollhouse').insert({ _id: 'echo', age: 10, someOtherProp: 'yes' }, function () {
-        store.collection('dollhouse').save({ _id: 'echo', age: 100, someOtherProp: 'yes' }, function () {});
+        store.collection('dollhouse').save({ _id: 'echo', age: 100, someOtherProp: 'yes' }, function () {
+        });
       });
     });
   });
   it('#oplog observe with query and update falling outside of query', function (done) {
     var store = getVDb();
     store.open().then(function () {
-      var cursor = store.collection('dollhouse').find({ _id: 'echo', age: { $gte: 10} });
+      var cursor = store.collection('dollhouse').find({ _id: 'echo', age: { $gte: 10 } });
       var handle = cursor.observe({
         oplog: true,
         added: function (x) {
@@ -76,7 +77,8 @@ describe('Oplog Observe', function () {
         }
       });
       store.collection('dollhouse').insert({ _id: 'echo', age: 10, someOtherProp: 'yes' }, function () {
-        store.collection('dollhouse').save({ _id: 'echo', age: 5, someOtherProp: 'yes' }, function () {});
+        store.collection('dollhouse').save({ _id: 'echo', age: 5, someOtherProp: 'yes' }, function () {
+        });
       });
     });
   });
@@ -120,7 +122,7 @@ describe('Oplog Observe', function () {
         }
       });
       collection.insert({ _id: 'echo', someOldProp: 'cool' });
-      collection.findAndModify({ _id: 'echo' }, null, { $set: { newProp: 'yes' }});
+      collection.findAndModify({ _id: 'echo' }, null, { $set: { newProp: 'yes' } });
     });
   })
   it('#oplog observe with query and update falling outside of query with findAndModify ', function (done) {
@@ -128,7 +130,7 @@ describe('Oplog Observe', function () {
     var store = getVDb();
     store.open().then(function () {
       var collection = store.collection('dollhouse');
-      var cursor = collection.find({age: { $gte: 10 }});
+      var cursor = collection.find({ age: { $gte: 10 } });
       handle = cursor.observe({
         oplog: true,
         added: function (x) {
@@ -146,7 +148,7 @@ describe('Oplog Observe', function () {
         }
       });
       collection.insert({ _id: 'echo', age: 10 }, function () {
-        collection.findAndModify({ _id: 'echo' }, null, { $set: { age: 5 }});
+        collection.findAndModify({ _id: 'echo' }, null, { $set: { age: 5 } });
       });
     });
   })
@@ -167,8 +169,8 @@ describe('Oplog Observe', function () {
         }
       });
       setTimeout(function () {
-        const update = { $set: { newProp: 'yes', moarComplex: { yes: { sir: true}} }};
-        const options = { upsert: true };
+        var update = { $set: { newProp: 'yes', moarComplex: { yes: { sir: true } } } };
+        var options = { upsert: true };
         collection.findAndModify({ _id: 'echo' }, null, update, options);
       }, 10);
     });
@@ -210,16 +212,15 @@ describe('Oplog Observe', function () {
         });
       });
       store.collection('dollhouse').insert({ _id: 'echo4' }, function () {
-        store.collection('dollhouse').insert({ _id: 'echo2' });
+        setTimeout(function () {
+          store.collection('dollhouse').insert({ _id: 'echo2' });
+        }, 50)
       });
     });
-  })
+  });
   it('#oplog observe with query and skip', function (done) {
     var store = getVDb();
     store.open().then(function () {
-      store.collection('dollhouse').insert({ _id: 'echo' });
-      store.collection('dollhouse').insert({ _id: 'echo2' });
-      store.collection('dollhouse').insert({ _id: 'echo3' });
       var cursor = store.collection('dollhouse').find({});
       var skip = 0;
       var handle;
@@ -239,6 +240,7 @@ describe('Oplog Observe', function () {
           realDone();
         }
       });
+      store.collection('dollhouse').insert([{ _id: 'echo' }, { _id: 'echo2' }, { _id: 'echo3' }]);
     });
   })
 });
