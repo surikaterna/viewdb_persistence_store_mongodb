@@ -19,19 +19,16 @@ describe('Oplog Observe', function () {
     });
   });
   beforeEach(function (done) {
-    _db.collection('dollhouse').drop(function () {
-      done();
-    });
+    _db.collection('dollhouse').remove({}, done)
   });
   afterEach(function (done) {
-    _db.dropDatabase(function () {
-      done();
-    });
-    // done();
+    done();
   });
   after(function (done) {
-    _db.close(function () {
-      done();
+    _db.dropDatabase(function () {
+      _db.close(function () {
+        done();
+      });
     });
   });
   it('#oplog observe with query and update', function (done) {
@@ -121,8 +118,9 @@ describe('Oplog Observe', function () {
           done();
         }
       });
-      collection.insert({ _id: 'echo', someOldProp: 'cool' });
-      collection.findAndModify({ _id: 'echo' }, null, { $set: { newProp: 'yes' } });
+      collection.insert({ _id: 'echo', someOldProp: 'cool' }, () => {
+        collection.findAndModify({ _id: 'echo' }, null, { $set: { newProp: 'yes' } });
+      });
     });
   })
   it('#oplog observe with query and update falling outside of query with findAndModify ', function (done) {
