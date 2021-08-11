@@ -1,6 +1,6 @@
 {
   "name": "viewdb_persistence_store_mongodb",
-  "version": "2.0.1",
+  "version": "1.6.8",
   "description": "",
   "main": "index.js",
   "directories": {
@@ -24,7 +24,7 @@
     "jshint": "^2.5.10",
     "mocha": "^2.0.1",
     "should": "^4.1.0",
-    "viewdb": "^0.5.9"
+    "viewdb": "^0.5.4"
   },
   "license": "MIT",
   "bugs": {
@@ -35,8 +35,8 @@
     "bluebird": "^2.9.30",
     "kuery": "^0.5.1",
     "lodash": "^4.13.1",
-    "mongodb": "^2.0.35",
-    "surikat-mongo-oplog": "^2.2.0"
+    "mongo-oplog": "^2.1.4",
+    "mongodb": "^2.0.35"
   },
   "peerDependencies": {
     "viewdb": "^0.x.x"
