@@ -1,6 +1,6 @@
 {
   "name": "viewdb_persistence_store_mongodb",
-  "version": "1.7.1",
+  "version": "2.0.0",
   "description": "",
   "main": "index.js",
   "directories": {
@@ -34,9 +34,9 @@
   "dependencies": {
     "bluebird": "^2.9.30",
     "kuery": "^0.5.2",
-    "lodash": "^4.13.1",
+    "lodash": "^4.x.x",
     "mongo-oplog": "^2.1.4",
-    "mongodb": "^2.0.35"
+    "mongodb": "^4.x.x"
   },
   "peerDependencies": {
     "viewdb": "^0.x.x"

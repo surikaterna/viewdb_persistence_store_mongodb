@@ -5,7 +5,7 @@ var ViewDb = require('viewdb');
 var Store = require('../lib/store');
 
 describe('Observe', function () {
-  var _db = null;
+  var _db, client = null;
   function getDb() {
     return _db;
   }
@@ -13,8 +13,10 @@ describe('Observe', function () {
     return new ViewDb(new Store(getDb()));
   }
   before(function (done) {
-    MongoClient.connect("mongodb://localhost:27017/db_test_suite", function (err, db) {
-      _db = db;
+    const url = "mongodb://localhost:27017";
+    client = new MongoClient(url, {});
+    client.connect(function (err) {
+      _db = client.db('db_test_suite');
       done();
     });
   });
@@ -30,7 +32,7 @@ describe('Observe', function () {
     // done();
   });
   after(function (done) {
-    _db.close(function () {
+    client.close(function () {
       done();
     });
   });

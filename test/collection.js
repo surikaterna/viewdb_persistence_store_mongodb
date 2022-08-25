@@ -6,14 +6,15 @@ var Server = require('mongodb').Server;
 var Store = require('../lib/store');
 
 describe('mongodb_persistence', function () {
-  var _db = null;
+  var _db, client = null;
   function getDb() {
     return _db;
   }
-
   before(function (done) {
-    MongoClient.connect("mongodb://localhost:27017/db_test_suite", function (err, db) {
-      _db = db;
+    const url = "mongodb://localhost:27017";
+    client = new MongoClient(url, {});
+    client.connect(function (err) {
+      _db = client.db('db_test_suite');
       done();
     });
   });
@@ -22,16 +23,8 @@ describe('mongodb_persistence', function () {
       done();
     });
   });
-  afterEach(function (done) {
-    /*		_db.dropDatabase(function() {
-     done();
-     });
-     */
-    done();
-  });
-
-	after(function (done) {
-    _db.close(function () {
+  after(function (done) {
+    client.close(function () {
       done();
     });
   })
@@ -58,8 +51,8 @@ describe('mongodb_persistence', function () {
     });
     it('#insert two documents with same key should throw', function (done) {
       var store = new Store(getDb());
-      store.open().then(function () {
-        store.collection('dollhouse').insert({ _id: 'echo' });
+      store.open().then(async function () {
+        await store.collection('dollhouse').insert({ _id: 'echo' });
         store.collection('dollhouse').insert({ _id: 'echo' }, function (err, result) {
           if (err) {
             done();
@@ -71,9 +64,9 @@ describe('mongodb_persistence', function () {
     });
     it('#update documents already existing', function (done) {
       var store = new Store(getDb());
-      store.open().then(function () {
-        store.collection('dollhouse').insert({ _id: 'echo' });
-        store.collection('dollhouse').save({ _id: 'echo', version: 2 });
+      store.open().then(async function () {
+        await store.collection('dollhouse').insert({ _id: 'echo' });
+        await store.collection('dollhouse').save({ _id: 'echo', version: 2 });
         store.collection('dollhouse').find({}).toArray(function (err, results) {
           results.length.should.equal(1);
           results[0].version.should.equal(2);
@@ -87,6 +80,56 @@ describe('mongodb_persistence', function () {
         store.collection('dollhouse').insert({ _id: 'echo' }, function () {
           store.collection('dollhouse').find({}).toArray(function (err, results) {
             results.length.should.equal(1);
+            done();
+          });
+        });
+      });
+    });
+    it('#findAndModify should update document', function (done) {
+      var store = new Store(getDb());
+      store.open().then(function () {
+        store.collection('dollhouse').save({ id: 'echo', a: 1 }, function () {
+          store.collection('dollhouse').findAndModify({ id: 'echo' }, null, { $set: { a: 2 } }, { upsert: false }, function (err, doc) {
+            store.collection('dollhouse').find({}).toArray(function (err, results) {
+              results.length.should.equal(1);
+              results[0].a.should.equal(2);
+              done();
+            });
+          });
+        });
+      });
+    });
+    it('#findAndModify should upsert document', function (done) {
+      var store = new Store(getDb());
+      store.open().then(function () {
+        store.collection('dollhouse').findAndModify({ _id: 2 }, null, { $set: { a: 2 } }, { upsert: true }, function (err, doc) {
+          store.collection('dollhouse').find({}).toArray(function (err, results) {
+            results.length.should.equal(1);
+              results[0].a.should.equal(2);
+            done();
+          });
+        });
+      });
+    });
+    it('#find {} should return single inserted document (from #save call)', function (done) {
+      var store = new Store(getDb());
+      store.open().then(function () {
+        store.collection('dollhouse').save({ id: 'echo' }, function (err, doc) {
+          store.collection('dollhouse').find({}).toArray(function (err, results) {
+            results.length.should.equal(1);
+            done();
+          });
+        });
+      });
+    });
+    it('#find {} should return multiple inserted documents (from #save call)', function (done) {
+      var store = new Store(getDb());
+      store.open().then(function () {
+        // store.collection('dollhouse').insert([{ _id: 'echo' }, { _id: 'sierra' }]);
+
+        store.collection('dollhouse').save([{ _id: 'echo' }, { _id: 'sierra' }], function (err, d) {
+          store.collection('dollhouse').find({}).toArray(function (err, results) {
+            results.length.should.equal(2);
             done();
           });
         });
@@ -107,9 +150,9 @@ describe('mongodb_persistence', function () {
     });
     it('#find {_id:"echo"} should return correct document', function (done) {
       var store = new Store(getDb());
-      store.open().then(function () {
-        store.collection('dollhouse').insert({ _id: 'echo' });
-        store.collection('dollhouse').insert({ _id: 'sierra' }, function () {
+      store.open().then(async function () {
+        await store.collection('dollhouse').insert({ _id: 'echo' });
+        await store.collection('dollhouse').insert({ _id: 'sierra' }, function () {
           store.collection('dollhouse').find({ _id: 'echo' }).toArray(function (err, results) {
             results.length.should.equal(1);
             results[0]._id.should.equal('echo');
@@ -120,9 +163,9 @@ describe('mongodb_persistence', function () {
     });
     it('#find with complex key {"name.first":"echo"} should return correct document', function (done) {
       var store = new Store(getDb());
-      store.open().then(function () {
-        store.collection('dollhouse').insert({ _id: 'echo', name: { first: 'ECHO', last: "TV" } });
-        store.collection('dollhouse').insert({ _id: 'sierra', name: { first: 'SIERRA', last: "TV" } }, function () {
+      store.open().then(async function () {
+        await store.collection('dollhouse').insert({ _id: 'echo', name: { first: 'ECHO', last: "TV" } });
+        await store.collection('dollhouse').insert({ _id: 'sierra', name: { first: 'SIERRA', last: "TV" } }, function () {
           store.collection('dollhouse').find({ "name.first": 'ECHO' }).toArray(function (err, results) {
             results.length.should.equal(1);
             results[0]._id.should.equal('echo');
@@ -133,10 +176,10 @@ describe('mongodb_persistence', function () {
     });
     it('#find with project should return correct projection', function (done) {
       var store = new Store(getDb());
-      store.open().then(function () {
-        store.collection('dollhouse').insert({ _id: 'echo', name: { first: 'ECHO', last: "TV" } });
-        store.collection('dollhouse').insert({ _id: 'sierra', name: { first: 'SIERRA', last: "TV" } }, function () {
-          store.collection('dollhouse').find({}).project({_id: 1}).toArray(function (err, results) {
+      store.open().then(async function () {
+        await store.collection('dollhouse').insert({ _id: 'echo', name: { first: 'ECHO', last: "TV" } });
+        await store.collection('dollhouse').insert({ _id: 'sierra', name: { first: 'SIERRA', last: "TV" } }, function () {
+          store.collection('dollhouse').find({}).project({ _id: 1 }).toArray(function (err, results) {
             should.equal(results[0].name, undefined);
             results[0]._id.should.equal('echo');
             done();
