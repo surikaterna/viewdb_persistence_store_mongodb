@@ -68,7 +68,7 @@ describe('Observe', function () {
       });
       collection.insert({ _id: 'echo' });
     });
-  })
+  });
   it('#observe with remove', function (done) {
     var realDone = _.after(2, done);
     var store = getVDb();
@@ -79,7 +79,7 @@ describe('Observe', function () {
           expect(x._id).toBe('echo');
           realDone();
         },
-        removed: function (x) {
+        removed: function () {
           handle.stop();
           realDone();
         }
@@ -89,7 +89,7 @@ describe('Observe', function () {
         coll.remove({ _id: 'echo' });
       });
     });
-  })
+  });
   it('#observe with query and insert', function (done) {
     var store = getVDb();
     store.open().then(function () {
@@ -107,7 +107,7 @@ describe('Observe', function () {
         store.collection(COLLECTION_NAME).insert({ _id: 'echo2' });
       });
     });
-  })
+  });
   it('#observe with query and skip', function (done) {
     var store = getVDb();
     store.open().then(function () {
@@ -123,15 +123,15 @@ describe('Observe', function () {
           expect(res).toHaveLength(0);
           handle.stop();
           done();
-        })
+        });
       });
 
       handle = cursor.observe({
-        added: function (x) {
+        added: function () {
           cursor.skip(++skip);
           realDone();
         }
       });
     });
-  })
+  });
 });
