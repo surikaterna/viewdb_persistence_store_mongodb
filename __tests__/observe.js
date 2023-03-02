@@ -1,57 +1,55 @@
-var should = require('should');
 var _ = require('lodash');
 var MongoClient = require('mongodb').MongoClient;
 var ViewDb = require('viewdb');
 var Store = require('../lib/store');
 
 describe('Observe', function () {
-  var _db = null;
-  function getDb() {
-    return _db;
-  }
-  function getVDb() {
-    return new ViewDb(new Store(getDb()));
-  }
-  before(function (done) {
-    MongoClient.connect("mongodb://localhost:27017/db_test_suite", function (err, db) {
-      _db = db;
-      done();
-    });
+  const COLLECTION_NAME = 'observe';
+
+  let _mongoClient;
+  let _db;
+
+  const getDb = () => _db;
+  const getVDb = () => new ViewDb(new Store(getDb()));
+
+  beforeAll(async () => {
+    const mongoClient = await MongoClient.connect('mongodb://localhost:27017/db_test_suite', { useUnifiedTopology: true });
+    const db = await mongoClient.db('db_test_suite');
+
+    _mongoClient = mongoClient;
+    _db = db;
   });
-  beforeEach(function (done) {
-    _db.collection('dollhouse').drop(function () {
-      done();
-    });
+
+  beforeEach(async () => {
+    try {
+      await _db.collection(COLLECTION_NAME).drop();
+    } catch (err) {
+      // No-op
+    }
   });
-  afterEach(function (done) {
-		_db.dropDatabase(function() {
-		 done();
-		 });
-    // done();
+
+  afterAll(async () => {
+    await _mongoClient.close();
   });
-  after(function (done) {
-    _db.close(function () {
-      done();
-    });
-  });
+
   it('#observe with query and update', function (done) {
     var store = getVDb();
     store.open().then(function () {
-      var cursor = store.collection('dollhouse').find({ _id: 'echo' });
+      var cursor = store.collection(COLLECTION_NAME).find({ _id: 'echo' });
       var handle = cursor.observe({
         added: function (x) {
-          x.age.should.equal(10);
-          x._id.should.equal('echo');
+          expect(x.age).toBe(10);
+          expect(x._id).toBe('echo');
         },
         changed: function (asis, tobe) {
-          asis.age.should.equal(10);
-          tobe.age.should.equal(100);
+          expect(asis.age).toBe(10);
+          expect(tobe.age).toBe(100);
           handle.stop();
           done();
         }
       });
-      store.collection('dollhouse').insert({ _id: 'echo', age: 10 }, function () {
-        store.collection('dollhouse').save({ _id: 'echo', age: 100 }, function () {});
+      store.collection(COLLECTION_NAME).insert({ _id: 'echo', age: 10 }, function () {
+        store.collection(COLLECTION_NAME).save({ _id: 'echo', age: 100 }, function () {});
       });
     });
   });
@@ -59,11 +57,11 @@ describe('Observe', function () {
     var handle;
     var store = getVDb();
     store.open().then(function () {
-      var collection = store.collection('dollhouse');
+      var collection = store.collection(COLLECTION_NAME);
       var cursor = collection.find({});
       handle = cursor.observe({
         added: function (x) {
-          x._id.should.equal('echo');
+          expect(x._id).toBe('echo');
           handle.stop();
           done();
         }
@@ -75,10 +73,10 @@ describe('Observe', function () {
     var realDone = _.after(2, done);
     var store = getVDb();
     store.open().then(function () {
-      var cursor = store.collection('dollhouse').find({});
+      var cursor = store.collection(COLLECTION_NAME).find({});
       var handle = cursor.observe({
         added: function (x) {
-          x._id.should.equal('echo');
+          expect(x._id).toBe('echo');
           realDone();
         },
         removed: function (x) {
@@ -86,7 +84,7 @@ describe('Observe', function () {
           realDone();
         }
       });
-      var coll = store.collection('dollhouse');
+      var coll = store.collection(COLLECTION_NAME);
       coll.insert({ _id: 'echo' }, function () {
         coll.remove({ _id: 'echo' });
       });
@@ -95,34 +93,34 @@ describe('Observe', function () {
   it('#observe with query and insert', function (done) {
     var store = getVDb();
     store.open().then(function () {
-      store.collection('dollhouse').insert({ _id: 'echo1' }, function () {
-        var cursor = store.collection('dollhouse').find({ _id: 'echo2' });
+      store.collection(COLLECTION_NAME).insert({ _id: 'echo1' }, function () {
+        var cursor = store.collection(COLLECTION_NAME).find({ _id: 'echo2' });
         var handle = cursor.observe({
           added: function (x) {
-            x._id.should.equal('echo2');
+            expect(x._id).toBe('echo2');
             done();
             handle.stop();
           }
         });
       });
-      store.collection('dollhouse').insert({ _id: 'echo4' }, function () {
-        store.collection('dollhouse').insert({ _id: 'echo2' });
+      store.collection(COLLECTION_NAME).insert({ _id: 'echo4' }, function () {
+        store.collection(COLLECTION_NAME).insert({ _id: 'echo2' });
       });
     });
   })
   it('#observe with query and skip', function (done) {
     var store = getVDb();
     store.open().then(function () {
-      store.collection('dollhouse').insert({ _id: 'echo' });
-      store.collection('dollhouse').insert({ _id: 'echo2' });
-      store.collection('dollhouse').insert({ _id: 'echo3' });
-      var cursor = store.collection('dollhouse').find({});
+      store.collection(COLLECTION_NAME).insert({ _id: 'echo' });
+      store.collection(COLLECTION_NAME).insert({ _id: 'echo2' });
+      store.collection(COLLECTION_NAME).insert({ _id: 'echo3' });
+      var cursor = store.collection(COLLECTION_NAME).find({});
       var skip = 0;
       var handle;
       cursor.limit(1);
       var realDone = _.after(3, function () {
         cursor.toArray(function (err, res) {
-          res.length.should.equal(0);
+          expect(res).toHaveLength(0);
           handle.stop();
           done();
         })

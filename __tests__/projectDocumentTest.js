@@ -1,5 +1,3 @@
-var should = require("should");
-var expect = require("mocha").expect;
 var projectDocument = require("../lib/utils").projectDocument;
 var _ = require("lodash");
 
@@ -7,7 +5,7 @@ describe("Project document", function () {
   it("#Should pick property", function (done) {
     var result = projectDocument({ alfa: "abc" }, { alfa: 1 });
 
-    result.should.eql({ alfa: "abc" });
+    expect(result).toEqual({ alfa: "abc" });
     done();
   });
 
@@ -17,7 +15,7 @@ describe("Project document", function () {
       { alfa: { bravo: { delta: 1 } } }
     );
 
-    result.should.eql({ alfa: { bravo: { delta: 2 } } });
+    expect(result).toEqual({ alfa: { bravo: { delta: 2 } } });
     done();
   });
 
@@ -34,7 +32,7 @@ describe("Project document", function () {
       { alfa: { bravo: { delta: 1 } } }
     );
 
-    result.should.eql({ alfa: { bravo: [{ delta: 1 }, { delta: 2 }] } });
+    expect(result).toEqual({ alfa: { bravo: [{ delta: 1 }, { delta: 2 }] } });
 
     done();
   });
@@ -51,7 +49,7 @@ describe("Project document", function () {
       },
       { alfa: { bravo: { echo: { gemini: 1 } } } }
     );
-    result.should.eql({ alfa: { bravo: [ { echo: { gemini: 3 } }, { echo: { gemini: 6 } } ] } });
+    expect(result).toEqual({ alfa: { bravo: [ { echo: { gemini: 3 } }, { echo: { gemini: 6 } } ] } });
 
     done();
   });
@@ -62,7 +60,7 @@ describe("Project document", function () {
       { bravo: 0 }
     );
 
-    result.should.eql({ alfa: 1, charlie: 3, delta: 4 });
+    expect(result).toEqual({ alfa: 1, charlie: 3, delta: 4 });
     done();
   });
 
@@ -72,7 +70,7 @@ describe("Project document", function () {
       { bravo: 0, delta: { echo: 0 } }
     );
 
-    result.should.eql({ alfa: 1, charlie: 3, delta: { foxtrot: 5 } });
+    expect(result).toEqual({ alfa: 1, charlie: 3, delta: { foxtrot: 5 } });
     done();
   });
 });
