@@ -25,6 +25,7 @@
     "jshint": "^2.5.10",
     "prettier": "^2.8.4",
     "prettier-config-surikaterna": "^1.0.1",
+    "slf-debug": "^0.3.1",
     "viewdb": "^0.5.12"
   },
   "license": "MIT",
@@ -36,7 +37,8 @@
     "bluebird": "^2.9.30",
     "kuery": "^0.5.5",
     "lodash": "^4.17.21",
-    "mongodb": "^3.7.3"
+    "mongodb": "^3.7.3",
+    "slf": "^2.0.3"
   },
   "peerDependencies": {
     "viewdb": "^0.x.x"
