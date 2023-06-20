@@ -82,6 +82,47 @@ describe('mongodb_persistence', () => {
         });
       });
     });
+    it('#update one document', function (done) {
+      var store = new Store(getDb());
+      store.open().then(function () {
+        store.collection(COLLECTION_NAME).insert({ _id: 'existing' }, () => {
+          store.collection(COLLECTION_NAME).updateOne({ _id: 'existing' }, { $set: { _id: 'existing', name: 'john' } }, () => {
+            store
+              .collection(COLLECTION_NAME)
+              .find({})
+              .toArray(function (err, results) {
+                expect(results).toHaveLength(1);
+                expect(results[0].name).toBe('john');
+                done();
+              });
+          });
+        });
+      });
+    });
+    it('#update many documents', function (done) {
+      var store = new Store(getDb());
+      store.open().then(function () {
+        store.collection(COLLECTION_NAME).insert(
+          [
+            { _id: 'existing1', name: 'john' },
+            { _id: 'existing2', name: 'john' }
+          ],
+          () => {
+            store.collection(COLLECTION_NAME).updateMany({ name: 'john' }, { $set: { lastName: 'connor' } }, () => {
+              store
+                .collection(COLLECTION_NAME)
+                .find({})
+                .toArray(function (err, results) {
+                  expect(results).toHaveLength(2);
+                  expect(results[0]).toEqual({ _id: 'existing1', name: 'john', lastName: 'connor' });
+                  expect(results[1]).toEqual({ _id: 'existing2', name: 'john', lastName: 'connor' });
+                  done();
+                });
+            });
+          }
+        );
+      });
+    });
     it('#find {} should return single inserted document', function (done) {
       var store = new Store(getDb());
       store.open().then(function () {
