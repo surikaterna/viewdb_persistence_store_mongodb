@@ -9,7 +9,7 @@ describe('mongodb_persistence', () => {
   const getDb = () => _db;
 
   beforeAll(async () => {
-    const mongoClient = await MongoClient.connect('mongodb://localhost:27017/db_test_suite', { useUnifiedTopology: true });
+    const mongoClient = await MongoClient.connect('mongodb://localhost:27017/db_test_suite');
     const db = await mongoClient.db('db_test_suite');
 
     _mongoClient = mongoClient;
@@ -243,8 +243,8 @@ describe('mongodb_persistence', () => {
       });
     };
     it('#skip/limit', function (done) {
-      var db = getDb();
-      var collection = db.collection(COLLECTION_NAME);
+      var store = new Store(getDb());
+      var collection = store.collection(COLLECTION_NAME);
       populate(collection, 0, function () {
         collection
           .find({ a: 'a' })

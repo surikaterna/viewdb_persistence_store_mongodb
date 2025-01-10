@@ -86,7 +86,7 @@ describe('Observe', function () {
       });
       var coll = store.collection(COLLECTION_NAME);
       coll.insert({ _id: 'echo' }, function () {
-        coll.remove({ _id: 'echo' });
+        coll.remove({ _id: 'echo' }, function () {});
       });
     });
   });
