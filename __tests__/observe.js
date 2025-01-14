@@ -13,7 +13,7 @@ describe('Observe', function () {
   const getVDb = () => new ViewDb(new Store(getDb()));
 
   beforeAll(async () => {
-    const mongoClient = await MongoClient.connect('mongodb://localhost:27017/db_test_suite', { useUnifiedTopology: true });
+    const mongoClient = await MongoClient.connect(global.__MONGO_URI__);
     const db = await mongoClient.db('db_test_suite');
 
     _mongoClient = mongoClient;
