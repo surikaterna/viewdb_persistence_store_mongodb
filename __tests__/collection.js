@@ -9,7 +9,7 @@ describe('mongodb_persistence', () => {
   const getDb = () => _db;
 
   beforeAll(async () => {
-    const mongoClient = await MongoClient.connect('mongodb://localhost:27017/db_test_suite');
+    const mongoClient = await MongoClient.connect(global.__MONGO_URI__);
     const db = await mongoClient.db('db_test_suite');
 
     _mongoClient = mongoClient;
@@ -253,6 +253,18 @@ describe('mongodb_persistence', () => {
           .toArray(function (err, res) {
             expect(res[1].id).toBe(9);
             expect(res).toHaveLength(2); // only 2 left after skipping 8/10
+            done();
+          });
+      });
+    });
+    it('#count', function (done) {
+      var store = new Store(getDb());
+      var collection = store.collection(COLLECTION_NAME);
+      populate(collection, 0, function () {
+        collection
+          .find({})
+          .count(function (err, res) {
+            expect(res).toBe(10);
             done();
           });
       });
