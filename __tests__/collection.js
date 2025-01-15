@@ -269,5 +269,18 @@ describe('mongodb_persistence', () => {
           });
       });
     });
+    it('#count should apply skip', function (done) {
+      var store = new Store(getDb());
+      var collection = store.collection(COLLECTION_NAME);
+      populate(collection, 0, function () {
+        collection
+          .find({})
+          .skip(8)
+          .count(function (err, res) {
+            expect(res).toBe(2);
+            done();
+          });
+      });
+    });
   });
 });
