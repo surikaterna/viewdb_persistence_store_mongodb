@@ -99,6 +99,44 @@ describe('mongodb_persistence', () => {
         });
       });
     });
+
+    it('#findAndModify upsert', async function () {
+      const store = new Store(getDb());
+      const filter = { _id: 'not-existing' };
+      const sort = {};
+      const update = { $setOnInsert: { test: 1 }, $push: { events: { event: 1, test: 2 }, references: { $each: [{ ref: 1 }, { ref: 2 }, { ref: 3 }] } } };
+      const options = { upsert: true };
+      await store.open()
+      await store.collection(COLLECTION_NAME).findAndModify(filter, sort, update, options);
+      const results = await store.collection(COLLECTION_NAME).find({}).toArray()
+      expect(results).toHaveLength(1);
+      expect(results[0]).toStrictEqual({
+        _id: 'not-existing',
+        events: [{ event: 1, test: 2 }],
+        references: [{ ref: 1 }, { ref: 2 }, { ref: 3 }],
+        test: 1
+      });
+    });
+
+    it('#findAndModify modify', async function () {
+      const store = new Store(getDb());
+      const filter = { _id: 'not-existing' };
+      const sort = {};
+      const update = { $setOnInsert: { test: 1 }, $push: { events: { event: 1, test: 2 }, references: { $each: [{ ref: 1 }, { ref: 2 }, { ref: 3 }] } } };
+      const options = { upsert: true };
+      await store.open()
+      await store.collection(COLLECTION_NAME).save({ _id: 'not-existing', test: 2, events: [{ event: 10, test: 3 }], references: [] });
+      await store.collection(COLLECTION_NAME).findAndModify(filter, sort, update, options);
+      const results = await store.collection(COLLECTION_NAME).find({}).toArray()
+      expect(results).toHaveLength(1);
+      expect(results[0]).toStrictEqual({
+        _id: 'not-existing',
+        events: [{ event: 10, test: 3 }, { event: 1, test: 2 }],
+        references: [{ ref: 1 }, { ref: 2 }, { ref: 3 }],
+        test: 2
+      });
+    });
+
     it('#update many documents', function (done) {
       var store = new Store(getDb());
       store.open().then(function () {
@@ -283,4 +321,5 @@ describe('mongodb_persistence', () => {
       });
     });
   });
-});
+})
+;
