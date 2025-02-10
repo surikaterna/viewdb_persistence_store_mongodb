@@ -260,7 +260,7 @@ describe('mongodb_persistence', () => {
       var store = new Store(getDb());
       store.collection(COLLECTION_NAME).insert({ _id: 'echo', name: { first: 'ECHO', last: 'TV' } });
       store.collection(COLLECTION_NAME).insert({ _id: 'sierra', name: { first: 'SIERRA', last: 'TV' } }, function () {
-        store.collection(COLLECTION_NAME).remove({ _id: 'echo' }, function () {
+        store.collection(COLLECTION_NAME).remove({ _id: 'echo' }, null,  function () {
           store
             .collection(COLLECTION_NAME)
             .find({ 'name.first': 'ECHO' })
